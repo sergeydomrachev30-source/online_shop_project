@@ -1,4 +1,6 @@
-from src.category import Category
+import pytest
+
+from src.category import Category, ClassIterator
 from src.product import Product
 
 
@@ -6,8 +8,8 @@ def test_product_init(product_iphone):
     """Тест инициализации товара"""
     assert product_iphone.name == "iPhone 15"
     assert product_iphone.description == "512GB, Gray"
-    assert product_iphone.price == 120000.0
-    assert product_iphone.quantity == 5
+    assert product_iphone.price == 210000.0
+    assert product_iphone.quantity == 10
 
 
 def test_category_init(category_electronics):
@@ -91,15 +93,15 @@ def test_new_product_creation():
 def test_category_products_property(category_electronics):
     result = category_electronics.products
     assert "iPhone 15" in result
-    assert "120000.0 руб." in result
-    assert "Остаток: 5 шт." in result
+    assert "210000.0 руб." in result
+    assert "Остаток: 10 шт." in result
 
 
 def test_category_products_display(category_electronics):
     display_string = category_electronics.products
 
     assert "iPhone 15" in display_string
-    assert "120000.0 руб." in display_string
+    assert "210000.0 руб." in display_string
 
 
 def test_category_add_product():
@@ -109,3 +111,50 @@ def test_category_add_product():
     cat.add_product(p)
 
     assert Category.product_count > 0
+
+
+@pytest.fixture
+def product_samsung():
+    return Product("Samsung Galaxy S23", "256GB", 180000.0, 5)
+
+
+@pytest.fixture
+def product_iphone():
+    return Product("iPhone 15", "512GB, Gray", 210000.0, 10)
+
+
+@pytest.fixture
+def category_smartphones(product_samsung, product_iphone):
+    return Category("Смартфоны", "Телефоны", [product_samsung, product_iphone])
+
+
+def test_product_str(product_samsung):
+    assert str(product_samsung) == "Samsung Galaxy S23, 180000.0 руб. Остаток: 5 шт."
+
+
+def test_product_add(product_samsung, product_iphone):
+    # (180000 * 5) + (210000 * 10) = 900000 + 2100000 = 3000000
+    assert product_samsung + product_iphone == 3000000.0
+
+
+def test_category_str(category_smartphones):
+    assert str(category_smartphones) == "Смартфоны, количество продуктов: 15 шт."
+
+
+def test_class_iterator(category_smartphones):
+    iterator = ClassIterator(category_smartphones)
+    products = []
+    for product in iterator:
+        products.append(product)
+
+    assert len(products) == 2
+    assert products[0].name == "Samsung Galaxy S23"
+    assert products[1].name == "iPhone 15"
+
+
+def test_iterator_stop(category_smartphones):
+    iterator = ClassIterator(category_smartphones)
+    next(iterator)
+    next(iterator)
+    with pytest.raises(StopIteration):
+        next(iterator)
