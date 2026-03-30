@@ -28,6 +28,10 @@ class Category:
         return result.strip()
 
     def add_product(self, product):
+        if not isinstance(product, Product):
+            raise TypeError(
+                "Добавлять можно только объекты класса Product или его наследников"
+            )
         self.__products.append(product)
         Category.product_count += 1
 

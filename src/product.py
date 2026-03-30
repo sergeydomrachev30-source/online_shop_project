@@ -18,7 +18,9 @@ class Product:
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        return self.quantity * self.price + other.price * other.quantity
+        if type(self) is not type(other):
+            raise TypeError("Можно складывать только товары одного класса")
+        return (self.quantity * self.price) + (other.price * other.quantity)
 
     @property
     def price(self):
@@ -52,3 +54,26 @@ class Product:
             product_params["price"],
             product_params["quantity"],
         )
+
+
+class Smartphone(Product):
+
+    def __init__(
+        self, name, description, price, quantity, efficiency, model, memory, color
+    ):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+
+class LawnGrass(Product):
+
+    def __init__(
+        self, name, description, price, quantity, country, germination_period, color
+    ):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
