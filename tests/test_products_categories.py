@@ -1,7 +1,7 @@
 import pytest
 
 from src.category import Category, ClassIterator
-from src.product import Product
+from src.product import LawnGrass, Product, Smartphone
 
 
 def test_product_init(product_iphone):
@@ -133,7 +133,6 @@ def test_product_str(product_samsung):
 
 
 def test_product_add(product_samsung, product_iphone):
-    # (180000 * 5) + (210000 * 10) = 900000 + 2100000 = 3000000
     assert product_samsung + product_iphone == 3000000.0
 
 
@@ -158,3 +157,50 @@ def test_iterator_stop(category_smartphones):
     next(iterator)
     with pytest.raises(StopIteration):
         next(iterator)
+
+
+@pytest.fixture
+def smartphone():
+    return Smartphone("iPhone 15", "Black", 100000.0, 2, "High", "15", 128, "Black")
+
+
+@pytest.fixture
+def lawn_grass():
+    return LawnGrass("Газон", "Зеленый", 500.0, 10, "Russia", "14 days", "Green")
+
+
+@pytest.fixture
+def category():
+    return Category("Электроника", "Техника", [])
+
+
+def test_add_same_classes(smartphone):
+    """Тест: можно складывать одинаковые классы"""
+    other_phone = Smartphone(
+        "Samsung", "White", 80000.0, 1, "High", "S23", 256, "White"
+    )
+    assert smartphone + other_phone == (100000.0 * 2) + (80000.0 * 1)
+
+
+def test_add_different_classes_raises_error(smartphone, lawn_grass):
+    """Тест: НЕЛЬЗЯ складывать разные классы"""
+    with pytest.raises(TypeError):
+        smartphone + lawn_grass
+
+
+def test_category_add_valid_product(category, smartphone, lawn_grass):
+    """Тест: можно добавлять наследников Product в категорию"""
+    category.add_product(smartphone)
+    category.add_product(lawn_grass)
+    # Проверяем, что в списке 2 товара
+    assert "iPhone 15" in category.products
+    assert "Газон" in category.products
+
+
+def test_category_add_invalid_object_raises_error(category):
+    """Тест: НЕЛЬЗЯ добавлять в категорию объекты не из семейства Product"""
+    with pytest.raises(TypeError):
+        category.add_product("Это просто строка, а не продукт")
+
+    with pytest.raises(TypeError):
+        category.add_product(500)
