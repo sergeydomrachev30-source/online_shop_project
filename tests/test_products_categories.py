@@ -1,7 +1,7 @@
 import pytest
 
-from src.category import Category, ClassIterator
-from src.product import LawnGrass, Product, Smartphone
+from src.category import Category, ClassIterator, Order
+from src.product import BaseProduct, LawnGrass, Product, Smartphone
 
 
 def test_product_init(product_iphone):
@@ -204,3 +204,38 @@ def test_category_add_invalid_object_raises_error(category):
 
     with pytest.raises(TypeError):
         category.add_product(500)
+
+
+def test_base_product_abstract_error():
+    """Проверка, что нельзя создать объект абстрактного класса BaseProduct"""
+    with pytest.raises(TypeError):
+        BaseProduct("Тест", "Описание", 100, 1)  # type: ignore
+
+
+def test_order_init(product_iphone):
+    """Тест создания заказа и расчета итоговой стоимости"""
+    order = Order(product_iphone, 3)
+    assert order.product.name == "iPhone 15"
+    assert order.quantity == 3
+    assert order.total_price == 630000.0  # 210000.0 * 3
+
+
+def test_order_str(product_iphone):
+    """Тест строкового представления заказа (__str__)"""
+    order = Order(product_iphone, 2)
+    assert str(order) == "Заказ на iPhone 15: 2 шт. Сумма: 420000.0 руб."
+
+
+def test_mixin_log_repr(product_iphone):
+    """Проверка наличия и работы метода __repr__ из миксина"""
+    repr_str = repr(product_iphone)
+    assert "Product" in repr_str
+    assert "iPhone 15" in repr_str
+
+
+def test_smartphone_repr(smartphone):
+    """Проверка, что миксин работает и для наследников (Смартфон)"""
+    # smartphone берется из твоей фикстуры
+    repr_str = repr(smartphone)
+    assert "Smartphone" in repr_str
+    assert "iPhone 15" in repr_str
