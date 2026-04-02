@@ -1,8 +1,11 @@
+import json
+import os
+
 import pytest
 
 from src.category import Category, ClassIterator, Order
 from src.product import BaseProduct, LawnGrass, Product, Smartphone
-
+from src.utils import  load_data_from_json
 
 def test_product_init(product_iphone):
     """Тест инициализации товара"""
@@ -239,3 +242,39 @@ def test_smartphone_repr(smartphone):
     repr_str = repr(smartphone)
     assert "Smartphone" in repr_str
     assert "iPhone 15" in repr_str
+
+def test_load_data_from_json_file_not_found():
+    # Тест на отсутствие файла
+    result = load_data_from_json("non_existent_file.json")
+    assert result == []
+
+
+def test_load_data_from_json_success():
+    """Тест успешной загрузки данных из временного JSON-файла"""
+    file_path = "test_products.json"
+    test_data = [
+        {
+            "name": "Смартфоны",
+            "description": "Полезные гаджеты",
+            "products": [
+                {
+                    "name": "iPhone 15",
+                    "description": "512GB",
+                    "price": 210000.0,
+                    "quantity": 10
+                }
+            ]
+        }
+    ]
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(test_data, f)
+    try:
+        result = load_data_from_json(file_path)
+
+        assert len(result) == 1
+        assert result[0].name == "Смартфоны"
+        assert "iPhone 15" in result[0].products
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
