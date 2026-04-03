@@ -1,7 +1,29 @@
+from abc import ABC, abstractmethod
 from typing import Any
 
 
-class Product:
+class BaseProduct(ABC):
+    @abstractmethod
+    def __init__(self, name, description, price, quantity):
+        """у каждого продукта должны быть эти 4 свойства"""
+        pass
+
+    @abstractmethod
+    def __str__(self):
+        """каждый продукт должен уметь печатать инфо о себе"""
+        pass
+
+
+class MixinLog:
+    def __init__(self, *args, **kwargs):
+        print(f"Был создан объект: {self.__repr__()}")
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.__dict__})"
+
+
+class Product(MixinLog, BaseProduct):
     name: str
     description: str
     __price: float
@@ -13,6 +35,7 @@ class Product:
         self.__price = 0.0
         self.price = price
         self.quantity = quantity
+        super().__init__(name, description, price, quantity)
 
     def __str__(self):
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."

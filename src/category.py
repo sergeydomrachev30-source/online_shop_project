@@ -1,7 +1,19 @@
+from abc import ABC, abstractmethod
+
 from src.product import Product
 
 
-class Category:
+class BaseCategoryOrder(ABC):
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+
+class Category(BaseCategoryOrder):
     name: str
     description: str
     __products: list[Product]
@@ -34,6 +46,16 @@ class Category:
             )
         self.__products.append(product)
         Category.product_count += 1
+
+
+class Order(BaseCategoryOrder):
+    def __init__(self, product: Product, quantity: int):
+        self.product = product
+        self.quantity = quantity
+        self.total_price = self.product.price * self.quantity
+
+    def __str__(self):
+        return f"Заказ на {self.product.name}: {self.quantity} шт. Сумма: {self.total_price} руб."
 
 
 class ClassIterator:
