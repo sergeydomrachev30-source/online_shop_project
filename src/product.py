@@ -30,11 +30,14 @@ class Product(MixinLog, BaseProduct):
     quantity: int
 
     def __init__(self, name, description, price, quantity):
+        if quantity <= 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
         self.name = name
         self.description = description
         self.__price = 0.0
         self.price = price
         self.quantity = quantity
+
         super().__init__(name, description, price, quantity)
 
     def __str__(self):
@@ -65,6 +68,8 @@ class Product(MixinLog, BaseProduct):
     def new_product(
         cls, product_params: dict[str, Any], products_list: list["Product"]
     ):
+        if product_params["quantity"] <= 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
         for product in products_list:
             if product.name == product_params["name"]:
                 product.quantity += product_params["quantity"]

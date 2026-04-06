@@ -5,7 +5,8 @@ import pytest
 
 from src.category import Category, ClassIterator, Order
 from src.product import BaseProduct, LawnGrass, Product, Smartphone
-from src.utils import  load_data_from_json
+from src.utils import load_data_from_json
+
 
 def test_product_init(product_iphone):
     """Тест инициализации товара"""
@@ -243,6 +244,7 @@ def test_smartphone_repr(smartphone):
     assert "Smartphone" in repr_str
     assert "iPhone 15" in repr_str
 
+
 def test_load_data_from_json_file_not_found():
     # Тест на отсутствие файла
     result = load_data_from_json("non_existent_file.json")
@@ -261,9 +263,9 @@ def test_load_data_from_json_success():
                     "name": "iPhone 15",
                     "description": "512GB",
                     "price": 210000.0,
-                    "quantity": 10
+                    "quantity": 10,
                 }
-            ]
+            ],
         }
     ]
 
@@ -278,3 +280,47 @@ def test_load_data_from_json_success():
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
+
+
+def test_calculate_average_price_normal():
+    """Тест расчета средней цены при наличии товаров"""
+    p1 = Product("iPhone", "Gray", 100000.0, 5)
+    p2 = Product("Xiaomi", "White", 40000.0, 5)
+    category = Category("Phones", "Description", [p1, p2])
+
+    # (100000 + 40000) / 2 = 70000.0
+    assert category.middle_price() == 70000.0
+
+
+def test_calculate_average_price_zero_division():
+    """Тест Задания 2: расчет средней цены для пустой категории (ZeroDivisionError)"""
+    empty_category = Category("Empty", "No products", [])
+
+    # Должно вернуть 0, а не упасть с ошибкой
+    assert empty_category.middle_price() == 0
+
+
+def test_add_product_zero_quantity_error(capsys):
+    """Тест на работу ZeroQuantityError и блоков try-else-finally"""
+    category = Category("Test", "Test", [])
+    p_bad = Product("Broken", "Test", 1000.0, 1)
+    # Искусственно обнуляем количество, чтобы проверить add_product
+    p_bad.quantity = 0
+    # Вызываем метод, который ловит ZeroQuantityError внутри себя
+    category.add_product(p_bad)
+    # Проверяем вывод в консоль
+    captured = capsys.readouterr()
+    assert "Товар с нулевым количеством не может быть добавлен" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+    assert len(category._Category__products) == 0
+
+
+def test_add_product_success_else_finally(capsys):
+    """Тест успешного добавления товара (блок else и finally)"""
+    category = Category("Test", "Test", [])
+    p_good = Product("Iphone", "Test", 100000.0, 10)
+    category.add_product(p_good)
+    captured = capsys.readouterr()
+    assert "Товар успешно добавлен" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+    assert len(category._Category__products) == 1

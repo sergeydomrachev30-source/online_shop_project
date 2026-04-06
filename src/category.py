@@ -3,6 +3,12 @@ from abc import ABC, abstractmethod
 from src.product import Product
 
 
+class ZeroQuantityError(ValueError):
+    def __init__(self, message="Товар с нулевым количеством не может быть добавлен"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class BaseCategoryOrder(ABC):
     @abstractmethod
     def __init__(self):
@@ -44,8 +50,26 @@ class Category(BaseCategoryOrder):
             raise TypeError(
                 "Добавлять можно только объекты класса Product или его наследников"
             )
-        self.__products.append(product)
-        Category.product_count += 1
+        try:
+            if product.quantity == 0:
+                raise ZeroQuantityError()
+        except ZeroQuantityError as e:
+            print(e)
+        else:
+            self.__products.append(product)
+            Category.product_count += 1
+            print("Товар успешно добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
+
+    def middle_price(self):
+        try:
+            total_price = 0
+            for product in self.__products:
+                total_price += product.price
+            return total_price / len(self.__products)
+        except ZeroDivisionError:
+            return 0
 
 
 class Order(BaseCategoryOrder):
